@@ -444,6 +444,15 @@ if main['GCC'] or main['CLANG']:
                          '-Wno-error=deprecated-declarations',
                          '-Wno-error=deprecated',
                         ])
+    # it comes from https://github.com/efeslab/dolma/blob/master/SConstruct
+    if main['GCC']:
+        gcc_version = readCommand([main['CXX'], '-dumpversion'], exception=False)
+        if compareVersions(gcc_version, "9") >= 0:
+            main.Append(CCFLAGS=['-Wno-error=deprecated-copy',
+                                 '-Wno-error=address-of-packed-member',
+                                 '-Wno-error=array-bounds',
+                                 '-Wno-error=uninitialized',
+                                 ])
 else:
     error('\n'.join(
           "Don't know what compiler options to use for your compiler.",

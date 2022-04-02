@@ -1,5 +1,7 @@
 FROM ubuntu:18.04
-LABEL maintainer="Sam Xi, Yuan Yao"
+LABEL maintainer="Wan Li"
+
+ADD sources.list /etc/apt/
 
 ###################################################
 ####      Install tools for development.       ####
@@ -7,15 +9,21 @@ LABEL maintainer="Sam Xi, Yuan Yao"
 
 RUN apt-get update && apt-get install -y \
   python \
-  python-pip \
+  # Package 'python-pip' has no installation candidate
+  python3-pip \ 
   git \
   tmux \
   vim \
   cmake \
   wget \
-  ack-grep
+  ack-grep \
+  iputils-ping
 
-RUN pip install --upgrade pip
+# RUN ping 192.168.1.108
+ENV http_proxy http://192.168.1.108:10081
+ENV https_proxy http://192.168.1.108:10081
+
+RUN pip3 install --upgrade pip
 
 ###########################################
 ####      Environment variables        ####
@@ -50,7 +58,7 @@ RUN apt-get install -y m4 \
       python3-pip \
       libgoogle-perftools-dev
 # Change the default Python version to 3.6.
-RUN update-alternatives --install /usr/bin/pip pip /usr/bin/pip2 1
+# RUN update-alternatives --install /usr/bin/pip pip /usr/bin/pip2 1
 RUN update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 2
 RUN pip3 install --user --upgrade pip
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python2.7 1
@@ -82,7 +90,7 @@ RUN wget -q http://releases.llvm.org/6.0.0/llvm-6.0.0.src.tar.xz && \
     mkdir build && \
     cd build && \
     cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release .. && \
-    make -j24 && \
+    make -j4 && \
     make install && \
     rm -rf /tmp/llvm-6.0.0* && \
     rm -rf /tmp/cfe-6.0.0*

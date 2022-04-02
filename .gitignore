@@ -1,3 +1,8 @@
+.vscode
+outputs
+*.gz
+*.out
+*.csv
 build
 parser.out
 parsetab.py

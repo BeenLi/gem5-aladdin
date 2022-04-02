@@ -24,11 +24,94 @@ If you have any questions, please send them to the gem5-aladdin users mailing
 list (see link at the very bottom).
 
 ##### Table of Contents ####
-1. [Notices](#notices)
-2. [Requirements](#requirements)
-3. [Installation](#installation)
-4. [Running the simulator](#running)
-5. [Writing a new program](#writing)
+1. [Build in ubuntu20-04](#local-build)
+2. [Notices](#notices)
+3. [Requirements](#requirements)
+4. [Installation](#installation)
+5. [Running the simulator](#running)
+6. [Writing a new program](#writing)
+
+<a name="local-build"/>
+
+## Build in ubuntu20-04 ##
+1. 环境：Ubuntu 20.04 + gcc-9.4**
+2. 在原有根目录下的SConstruct添加了如下行(为了兼容gcc9)
+    
+    ```c++
+    # 447 line +
+    # it comes from https://github.com/efeslab/dolma/blob/master/SConstruct
+    if main['GCC']:
+        gcc_version = readCommand([main['CXX'], '-dumpversion'], exception=False)
+        if compareVersions(gcc_version, "9") >= 0:
+            main.Append(CCFLAGS=['-Wno-error=deprecated-copy',
+                                 '-Wno-error=address-of-packed-member',
+                                 '-Wno-error=array-bounds',
+                                 '-Wno-error=uninitialized',
+                                 ])
+    ```
+    
+3. [安装clang-6.0](https://blog.csdn.net/weixin_43953703/article/details/94344889)
+    
+    a. 添加相关源到/etc/apt/sources.list
+        
+      ```bash
+      deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-6.0 main
+      deb-src http://apt.llvm.org/xenial/ llvm-toolchain-xenial-6.0 main
+      ```
+        
+    
+    b. 添加数字证书
+    
+    ```bash
+    wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+    ```
+    
+    c. 查看当前包有没有
+    
+    ```bash
+    apt-cache madison clang-6.0
+    apt-cache policy clang-6.0 (查看包在那个仓库下)
+    apt-cache show python2.7 (查看包更多信息, 版本，依赖，大小)
+    dpkg -s python2.7 (查看已经安装的包)
+    ```
+    
+    ![Untitled](https://image.beenli.cn/Untitled%2013.png?imageslim)
+    
+    ![Untitled](https://image.beenli.cn/Untitled%2014.png?imageslim)
+    
+    ![Untitled](https://image.beenli.cn/Untitled%2015.png?imageslim)
+    
+    c. 设置clang默认使用clang-6.0
+    
+    ```bash
+    sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-10 100 --slave /usr/bin/clang++ clang++ /usr/bin/clang++-10
+    sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-6.0 60 --slave /usr/bin/clang++ clang++ /usr/bin/clang++-6.0
+    sudo update-alternatives --config clang
+    ```
+    
+    ![Untitled](https://image.beenli.cn/Untitled%2016.png?imageslim)
+    
+4. 安装[boost_1_78_0](https://cloud.tencent.com/developer/ask/107360)
+   
+    ![Untitled](https://image.beenli.cn/Untitled%2017.png?imageslim)
+    
+    ![Untitled](https://image.beenli.cn/Untitled%2018.png?imageslim)
+    
+5. 安装python2.7
+    1. sudo apt install python2.7
+    2. 如果找不到python2.7-config，使用`sudo apt install python2.7-dev`
+6. 开始编译gem5-aladdin
+   
+    ```bash
+    python2.7 `which scons` build/X86/gem5.opt PROTOCOL=MESI_Two_Level_aladdin -j4
+    ```
+    
+7. 跑一些测试
+    ```bash
+    cd src/aladdin/integration-test/with-cpu
+    export ALADDIN_HOME=/your gem5-aladdin diercory/src/aladdin
+    bash run.sh
+    ```
 
 <a name="notices"/>
 
